@@ -59,7 +59,7 @@ def start_game(name_user1, name_user2, user1_letters, user2_letters):
     print('Раздаю случайные буквы')
 
     # распределение первых 7 букв
-    for i in range(50):
+    for i in range(7):
         user1_letters.append(random.choice(list(dict_letters)))
         user2_letters.append(random.choice(list(dict_letters)))
     removing_letters_from_the_dictionary(user1_letters)
@@ -144,7 +144,7 @@ def victory(user1_points, user2_points, name_user1, name_user2):
         print(f'{sum(user1_points)} : {sum(user2_points)}')
 
 def exit(user_input):
-    if user_input == 'exit':
+    if user_input == 'stop':
         return False
     return True
 
