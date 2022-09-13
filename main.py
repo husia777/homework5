@@ -1,13 +1,19 @@
 import random
+
+#список для считывания файла
 content = []
-flag = 1
+#список слов которые были отгаданы
 guessed_words = []
-dict_points = { 3 : 3,
-                4 : 6,
-                5 : 7,
-                6 : 8}
+dict_points = {3 : 3,
+               4 : 6,
+               5 : 7,
+               6 : 8}
 
+#ввод игроков
+user1_input = ''
+user2_input = ''
 
+#имя игроков
 name_user1 = []
 name_user2 = []
 
@@ -31,31 +37,38 @@ user1_letters_to_be_added = []
 user2_letters_to_be_added = []
 
 
+#Функция начисления балла при отрицательном ответе
+def add_points(name_user, user_letters_to_be_added, user_letters,  ):
+    print(f'{name_user} не получает очков.')
+    user_letters_to_be_added.append(random.choice(list(dict_letters)))
+    print(f'Добавляю букву {str(user_letters_to_be_added)}')
+    user_letters.extend(user_letters_to_be_added)
+    removing_letters_from_the_dictionary(user_letters_to_be_added)
+    user_letters_to_be_added.clear()
+
+
 #Функция приветствия и расфасовки каждому игроку по 7 букв для начала игры
-def start_game():
+def start_game(name_user1, name_user2, user1_letters, user2_letters):
+    '''
+
+    :return:
+    '''
     print('Привет.')
     print('Мы начинаем играть в Scrabble')
-    print('Как зовут первого игрока?')
-    global name_user1
-    name_user1 = input('Введите ваше имя')
-    print('Как зовут второго игрока?')
-    global name_user2
-    name_user2 = input('Введите ваше имя')
     print(f'{name_user1} vs {name_user2}')
     print('Раздаю случайные буквы')
 
     # распределение первых 7 букв
-    for i in range(6):
+    for i in range(50):
         user1_letters.append(random.choice(list(dict_letters)))
         user2_letters.append(random.choice(list(dict_letters)))
-    removing_letters_from_the_dictionary1(user1_letters)
-    removing_letters_from_the_dictionary2(user2_letters)
+    removing_letters_from_the_dictionary(user1_letters)
+    removing_letters_from_the_dictionary(user2_letters)
     print(f'{name_user1} - буквы {" ".join(user1_letters)}')
     print(f'{name_user2} - буквы {" ".join(user2_letters)}')
 
-
-#удаление букв из словаря которые выдали пользователю 1
-def removing_letters_from_the_dictionary1(word):
+#удаление букв из словаря
+def removing_letters_from_the_dictionary(word):
     for letter in word:
         if letter in dict_letters:
             dict_letters[letter] -= 1
@@ -63,107 +76,65 @@ def removing_letters_from_the_dictionary1(word):
                 del dict_letters[letter]
 
 
-# удаление букв из словаря которые выдали пользователю 2
-def removing_letters_from_the_dictionary2(word):
-    for letter in word:
-        if letter in dict_letters:
-            dict_letters[letter] -= 1
-            if dict_letters[letter] == 0:
-                del dict_letters[letter]
 
 
-# Ход и проверка хода первого игрока
-def user1_move():
-    print(f'Ходит  {name_user1}')
-    print(f'{name_user1} - буквы {" ".join(user1_letters)}')
-    while True:
-        user1_input = input('Введите слово')
-        print(f'Вы ввели слово {user1_input}')
-        with open('ru_word.txt') as file:
-            for line in file.readlines():
-                line = line.rstrip('\n')
-                content.append(line)
+# Ход и проверка хода  игрока
+def user_move(name_user, user_letters, user_input, guessed_words, user_letters_to_be_added, dict_letters):
+    """:param name_user: имя игрока
+    :param user_letters: буквы которые есть у пользователя
+    :param user_input: ввод слова
+    :param guessed_words: список слов которые уже были разгаданы
+    :param user_letters_to_be_added: буквы которые получит игрок
+    :param dict_letters: словарь букв
+    :return: функция прекращается при вводе пользователем exit
+    """
+    print(f'Ходит  {name_user}')
+    print(f'{name_user} - буквы {" ".join(user_letters)}')
+    print(f'Вы ввели слово {user_input}')
+    with open('ru_word.txt', encoding='utf-8') as file:
+        open_file = file.read().splitlines()
+        # Проверяем есть ли слово введенное пользователем в файле и что его длина соответсвтует минимальной и максимальной длине слов в файле
+    if user_input in open_file:
+        #Проверяем не повторяется ли введенное слово
+        if user_input not in guessed_words:
+                #Проверяем имеются ли у нас все буквы для составления данного слова
+                if list(user_input).sort() == user_letters.sort():
+                    print('Такое слово есть.')
+                    score = len(user_input)
+                    print(score)
+                    print(f'{name_user} получает {dict_points[score]} баллов')
+                    guessed_words.append(user_input)
+                    user1_points.append(dict_points[len(user_input)])
+                    user_letters_to_be_added.clear()
+                    for i in range(len(user_input) + 1):
+                        user_letters_to_be_added.append(random.choice(list(dict_letters)))
+                    print(f'Добавляю буквы {str(user_letters_to_be_added)}')
+                    user_letters.extend(user_letters_to_be_added)
+                    removing_letters_from_the_dictionary(user_letters_to_be_added)
+                    user_letters_to_be_added.clear()
+                    for i in user_input:
+                        if i in user_letters:
+                            user_letters.remove(i)
 
-        if user1_input in content and 3 <= len(user1_input) <= 6 and user1_input not in guessed_words and list(user1_input).sort() == user1_letters:
-            print('Такое слово есть.')
-            print(f'{name_user1} получает {dict_points[len(user1_input)]} баллов')
-            guessed_words.append(user1_input)
-            user1_points.append(dict_points[len(user1_input)])
-            global user1_letters_to_be_added
-            user1_letters_to_be_added.clear()
-            for i in range(len(user1_input) + 1):
-                user1_letters_to_be_added.append(random.choice(list(dict_letters)))
-            print(f'Добавляю буквы {str(user1_letters_to_be_added)}')
-            user1_letters.extend(user1_letters_to_be_added)
-            removing_letters_from_the_dictionary1(user1_letters_to_be_added)
-            user1_letters_to_be_added.clear()
-            for i in user1_input:
-                if i in user1_letters:
-                    user1_letters.remove(i)
-            break
 
+                else:
+                    add_points(name_user, user_letters_to_be_added, user_letters)
+                    print('У вас нет нужных букв.')
         else:
-            print('Такого слова нет или это слово уже отгадывалось или вас нет нужных букв.')
-            print(f'{name_user1} не получает очков.')
-            user1_letters_to_be_added.append(random.choice(list(dict_letters)))
-            print(f'Добавляю букву {str(user1_letters_to_be_added)}')
-            user1_letters.extend(user1_letters_to_be_added)
-            removing_letters_from_the_dictionary1(user1_letters_to_be_added)
-            user1_letters_to_be_added.clear()
-            break
+            add_points(name_user, user1_letters_to_be_added, user_letters)
+            print('Это слово уже отгадывалось')
+
+    else:
+        add_points(name_user, user_letters_to_be_added, user_letters)
+        print('Этого слова нет в файле')
 
 
 
-
-# Ход и проверка хода второго игрока
-def user2_move():
-    print(f'Ходит  {name_user2}')
-    print(f'{name_user2} - буквы {" ".join(user2_letters)}')
-    while True:
-        user2_input = input('Введите слово')
-        print(f'Вы ввели слово {user2_input}')
-
-        with open('ru_word.txt') as file:
-            content = file.read()
-            content = content.split('\n')
-        if user2_input in content and 3 <= len(user2_input) <= 6 and user2_input not in guessed_words and list(user2_input).sort() == user2_letters:
-            print('Такое слово есть.')
-            print(f'{name_user2} получает {dict_points[len(user2_input)]} баллов')
-            guessed_words.append(user2_input)
-            content.remove(user2_input)
-            print(content)
-            user2_points.append(dict_points[len(user2_input)])
-            global user2_letters_to_be_added
-            user2_letters_to_be_added.clear()
-            for i in range(len(user2_input) + 1):
-                user2_letters_to_be_added.append(random.choice(list(dict_letters)))
-            user2_letters.extend(user2_letters_to_be_added)
-            print(f'Добавляю буквы {str(user2_letters_to_be_added)}')
-            removing_letters_from_the_dictionary2(user1_letters_to_be_added)
-            user2_letters_to_be_added.clear()
-            for i in user2_input:
-                if i in user2_letters:
-                    user2_letters.remove(i)
-            break
-
-        else:
-            print('Такого слова нет или это слово уже отгадывалось или вас нет нужных букв.')
-            print(f'{name_user2} не получает очков.')
-            user2_letters_to_be_added.append(random.choice(list(dict_letters)))
-            print(f'Добавляю букву {str(user2_letters_to_be_added)}')
-            user2_letters.extend(user2_letters_to_be_added)
-            removing_letters_from_the_dictionary2(user2_letters_to_be_added)
-            user2_letters_to_be_added.clear()
-            break
-
-
-
-#вывод победителя
-def victory():
+#функция вывода победителя
+def victory(user1_points, user2_points, name_user1, name_user2):
     if sum(user1_points) > sum(user2_points):
         print(f'Победил {name_user1}')
         print(f'{sum(user1_points)} : {sum(user2_points)}')
-
     elif sum(user1_points) < sum(user2_points):
         print(f'Победил {name_user2}')
         print(f'{sum(user2_points)} : {sum(user1_points)}')
@@ -172,29 +143,35 @@ def victory():
         print('Ничья')
         print(f'{sum(user1_points)} : {sum(user2_points)}')
 
+def exit(user_input):
+    if user_input == 'exit':
+        return False
+    return True
+
+
+
 
 #старт игры
 def start():
+    counter = 0
+    print(dict_letters)
+    user1_input = input('Как зовут первого игрока')
+    user2_input = input('Как зовут второго игрока')
+    start_game(user1_input, user2_input, user1_letters, user2_letters)
     while True:
-        game = input('Нажмите старт для начала или стоп для выхода из игры')
-        if game == 'старт':
-            start_game()
-            while len(dict_letters) > 0:
-                user1_move()
-                user2_move()
-                print(dict_letters)
-
-            else:
+        counter += 1
+        if counter % 2 == 0:
+            user_input = input(f'Ходит {user2_input}. Введите слово')
+            if not exit(user_input):
                 break
-                print('Игра окончена')
-                victory()
-
+            user_move(user1_input, user2_letters, user_input, guessed_words, user2_letters_to_be_added,dict_letters)
         else:
-            break
-            victory()
-
-    else:
-        victory()
+            user_input = input(f'Ходит {user1_input}. Введите слово')
+            if not exit(user_input):
+                break
+            user_move(user2_input, user1_letters, user_input, guessed_words, user1_letters_to_be_added, dict_letters)
+    print('Игра окончена')
+    victory(user1_points, user2_points, user1_input, user2_input)
 
 
 start()
